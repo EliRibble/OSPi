@@ -1,30 +1,30 @@
 # -*- coding: utf-8 -*-
-
-
-import i18n
-
-import datetime
+from security import password_hash
 from threading import Thread
-import os
-import random
-import sys
-import time
-import subprocess
-import io
-import ast
 from web.webapi import seeother
 
-try:
-    from pins import GPIO, set_output
-except ImportError:
-    print 'error importing GPIO pins into helpers'
-    pass
-
+import ast
+import datetime
+import i18n
+import io
+import logging
+import os
+import subprocess
+import sys
+import time
 import web
+
+LOGGER = logging.getLogger(__name__)
+
+try:
+    from gv import GPIO
+except ImportError as e:
+    LOGGER.error('Error importing GPIO pins into helpers: %s', e)
+
+from pins import set_output
 from web import form
 
 import gv
-from web.session import sha1
 
 try:
     import json
@@ -318,37 +318,6 @@ def jsave(data, fname):
     """Save data to a json file."""
     with open('./data/' + fname + '.json', 'w') as f:
         json.dump(data, f)
-
-
-def station_names():
-    """Load station names from file if it exists otherwise create file with defaults."""
-    try:
-        with open('./data/snames.json', 'r') as snf:
-            return json.load(snf)
-    except IOError:
-        stations = [u"S01", u"S02", u"S03", u"S04", u"S05", u"S06", u"S07", u"S08"]
-        jsave(stations, 'snames')
-        return stations
-
-
-def load_programs():
-    """Load program data from json file, if it exists, into memory, otherwise create an empty programs var."""
-    try:
-        with open('./data/programs.json', 'r') as pf:
-            gv.pd = json.load(pf)
-    except IOError:
-        gv.pd = []  # A config file -- return default and create file if not found.
-        with open('./data/programs.json', 'w') as pf:
-            json.dump(gv.pd, pf)
-    return gv.pd
-
-
-def password_salt():
-    return "".join(chr(random.randint(33, 127)) for _ in xrange(64))
-
-
-def password_hash(password, salt):
-    return sha1(password + salt).hexdigest()
 
 
 ########################

@@ -1,12 +1,13 @@
-import json
-import time
-import datetime
-import string
 import calendar
-
-from helpers import get_cpu_temp, check_login, password_hash
-import web
+import datetime
 import gv  # Gain access to ospi's settings
+import json
+import string
+import time
+import web
+
+from helpers import get_cpu_temp, check_login
+from security import password_hash
 from urls import urls  # Gain access to ospi's URL list
 from webpages import ProtectedPage, WebPage
 

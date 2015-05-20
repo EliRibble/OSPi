@@ -14,7 +14,7 @@ sys.path.append('./plugins')
 import web  # the Web.py module. See webpy.org (Enables the Python OpenSprinkler web interface)
 import gv
 
-from helpers import plugin_adjustment, prog_match, schedule_stations, log_run, stop_onrain, jsave, station_names
+from helpers import plugin_adjustment, prog_match, schedule_stations, log_run, stop_onrain, jsave
 from urls import urls  # Provides access to URLs for UI pages
 from pins import check_rain, set_output
 

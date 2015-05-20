@@ -1,6 +1,8 @@
 # !/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import logging
+LOGGER = logging.getLogger(__name__)
 
 ##############################
 #### Revision information ####
@@ -34,9 +36,44 @@ from calendar import timegm
 import json
 import time
 
-platform = ''  # must be done before the following import because pins will try to set it
+try:
+    import RPi.GPIO as GPIO
+    platform = 'pi'
+    LOGGER.info("Set platform to pi")
+except ImportError as e:
+    LOGGER.info("Failed to import Raspberry PI GPIO. Checking for Beagle Bone...")
+    try:
+        import Adafruit_BBIO.GPIO as GPIO
+        platform = 'bo'
+        LOGGER.info("Set platform to bo")
+    except ImportError as e:
+        LOGGER.info("Failed to import Beagle Bone GPIO. GPIO disabled")
+        platform = 'unknown'
 
-from helpers import password_salt, password_hash, load_programs, station_names
+from security import password_salt, password_hash
+
+def load_programs():
+    """Load program data from json file, if it exists, into memory, otherwise create an empty programs var."""
+    try:
+        with open('./data/programs.json', 'r') as pf:
+            pd = json.load(pf)
+    except IOError:
+        pd = []  # A config file -- return default and create file if not found.
+        with open('./data/programs.json', 'w') as pf:
+            json.dump(pd, pf)
+    return pd
+
+def station_names():
+    """Load station names from file if it exists otherwise create file with defaults."""
+    try:
+        with open('./data/snames.json', 'r') as snf:
+            return json.load(snf)
+    except IOError:
+        stations = [u"S01", u"S02", u"S03", u"S04", u"S05", u"S06", u"S07", u"S08"]
+        jsave(stations, 'snames')
+        return stations
+
+
 
 sd = {
     u"en": 1,

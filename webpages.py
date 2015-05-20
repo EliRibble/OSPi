@@ -9,10 +9,11 @@ import io
 import ast
 
 import gv
-from helpers import *
-from pins import set_output
-from ospi import template_render
 from blinker import signal
+from helpers import *
+from ospi import template_render
+from pins import set_output
+from security import password_hash, password_salt
 
 loggedin = signal('loggedin')
 def report_login():

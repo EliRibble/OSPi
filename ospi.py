@@ -1,5 +1,8 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
+import logging
+logging.basicConfig()
+logging.getLogger().setLevel(logging.DEBUG)
 
 from calendar import timegm
 
@@ -7,7 +10,7 @@ import ast
 import i18n
 
 import json
-import logging
+import pins
 import sys
 import time
 import thread
@@ -18,9 +21,8 @@ LOGGER = logging.getLogger('ospi')
 import web  # the Web.py module. See webpy.org (Enables the Python OpenSprinkler web interface)
 import gv
 
-from helpers import plugin_adjustment, prog_match, schedule_stations, log_run, stop_onrain, jsave, station_names
+from helpers import plugin_adjustment, prog_match, schedule_stations, log_run, stop_onrain, jsave
 from urls import urls  # Provides access to URLs for UI pages
-from pins import set_output, check_rain
 
 
 def timing_loop():
@@ -73,7 +75,7 @@ def timing_loop():
                     if gv.srvals[sid]:  # if this station is on
                         if gv.now >= gv.rs[sid][1]:  # check if time is up
                             gv.srvals[sid] = 0
-                            set_output()
+                            pins.set_output()
                             gv.sbits[b] &= ~(1 << s)
                             if gv.sd['mas'] - 1 != sid:  # if not master, fill out log
                                 gv.ps[sid] = [0, 0]
@@ -88,7 +90,7 @@ def timing_loop():
                         if gv.rs[sid][0] <= gv.now < gv.rs[sid][1]:
                             if gv.sd['mas'] - 1 != sid:  # if not master
                                 gv.srvals[sid] = 1  # station is turned on
-                                set_output()
+                                pins.set_output()
                                 gv.sbits[b] |= 1 << s  # Set display to on
                                 gv.ps[sid][0] = gv.rs[sid][3]
                                 gv.ps[sid][1] = gv.rs[sid][2]
@@ -100,7 +102,7 @@ def timing_loop():
                             elif gv.sd['mas'] == sid + 1:
                                 gv.sbits[b] |= 1 << sid  # (gv.sd['mas'] - 1)
                                 gv.srvals[masid] = 1
-                                set_output()
+                                pins.set_output()
 
             for s in range(gv.sd['nst']):
                 if gv.rs[s][1]:  # if any station is scheduled
@@ -121,7 +123,7 @@ def timing_loop():
 
             if not program_running:
                 gv.srvals = [0] * (gv.sd['nst'])
-                set_output()
+                pins.set_output()
                 gv.sbits = [0] * (gv.sd['nbrd'] + 1)
                 gv.ps = []
                 for i in range(gv.sd['nst']):
@@ -143,7 +145,7 @@ def timing_loop():
                     gv.rs[gv.sd['mas'] - 1][1] = gv.now  # turn off master
 
         if gv.sd['urs']:
-            check_rain()
+            pins.check_rain()
 
         if gv.sd['rd'] and gv.now >= gv.sd['rdst']:  # Check of rain delay time is up
             gv.sd['rd'] = 0
@@ -180,9 +182,6 @@ template_globals = {
 template_render = web.template.render('templates', globals=template_globals, base='base')
 
 def main():
-    logging.basicConfig()
-    logging.getLogger().setLevel(logging.DEBUG)
-
     # Code to import all webpages and plugin webpages
     import plugins
 
@@ -194,6 +193,8 @@ def main():
         gv.plugin_menu.pop(gv.plugin_menu.index(['Manage Plugins', '/plugins']))
     except Exception:
         pass
+
+    pins.setup()
 
     thread.start_new_thread(timing_loop, ())
 
