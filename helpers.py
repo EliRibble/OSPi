@@ -15,7 +15,7 @@ import ast
 from web.webapi import seeother
 
 try:
-    from gpio_pins import GPIO, pin_rain_sense
+    from pins import GPIO, pin_rain_sense, set_output
 except ImportError:
     print 'error importing GPIO pins into helpers'
     pass
@@ -41,7 +41,6 @@ except ImportError:
 
 def reboot(wait=1, block=False):
     if block:
-        from gpio_pins import set_output
         gv.srvals = [0] * (gv.sd['nst'])
         set_output()
         GPIO.cleanup()
@@ -58,7 +57,6 @@ def reboot(wait=1, block=False):
 
 def poweroff(wait=1, block=False):
     if block:
-        from gpio_pins import set_output
         gv.srvals = [0] * (gv.sd['nst'])
         set_output()
         GPIO.cleanup()
@@ -75,7 +73,6 @@ def poweroff(wait=1, block=False):
 
 def restart(wait=1, block=False):
     if block:
-        from gpio_pins import set_output
         gv.srvals = [0] * (gv.sd['nst'])
         set_output()
         try:
@@ -145,7 +142,6 @@ def check_rain():
 
 def clear_mm():
     """Clear manual mode settings."""
-    from gpio_pins import set_output
     if gv.sd['mm']:
         gv.sbits = [0] * (gv.sd['nbrd'] + 1)
         gv.ps = []
@@ -291,7 +287,6 @@ def schedule_stations(stations):
 def stop_onrain():
     """Stop stations that do not ignore rain."""
 
-    from gpio_pins import set_output
     for b in range(gv.sd['nbrd']):
         for s in range(8):
             sid = b * 8 + s  # station index
@@ -308,7 +303,6 @@ def stop_onrain():
 
 def stop_stations():
     """Stop all running stations, clear schedules."""
-    from gpio_pins import set_output
     gv.srvals = [0] * (gv.sd['nst'])
     set_output()
     gv.ps = []

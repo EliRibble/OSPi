@@ -10,7 +10,7 @@ import ast
 
 import gv
 from helpers import *
-from gpio_pins import set_output
+from pins import set_output
 from ospi import template_render
 from blinker import signal
 

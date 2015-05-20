@@ -16,7 +16,7 @@ import gv
 
 from helpers import plugin_adjustment, prog_match, schedule_stations, log_run, stop_onrain, check_rain, jsave, station_names
 from urls import urls  # Provides access to URLs for UI pages
-from gpio_pins import set_output
+from pins import set_output
 
 
 def timing_loop():

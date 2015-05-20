@@ -34,7 +34,7 @@ from calendar import timegm
 import json
 import time
 
-platform = ''  # must be done before the following import because gpio_pins will try to set it
+platform = ''  # must be done before the following import because pins will try to set it
 
 from helpers import password_salt, password_hash, load_programs, station_names
 
