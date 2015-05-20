@@ -162,7 +162,6 @@ class OSPiApp(web.application):
 
 
 app = OSPiApp(urls, globals())
-#  disableShiftRegisterOutput()
 web.config.debug = False  # Improves page load speed
 if web.config.get('_session') is None:
     web.config._session = web.session.Session(app, web.session.DiskStore('sessions'),
