@@ -1,15 +1,19 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from calendar import timegm
+
+import ast
 import i18n
 
 import json
-import ast
+import logging
+import sys
 import time
 import thread
-from calendar import timegm
-import sys
+
 sys.path.append('./plugins')
+LOGGER = logging.getLogger('ospi')
 
 import web  # the Web.py module. See webpy.org (Enables the Python OpenSprinkler web interface)
 import gv
@@ -22,7 +26,7 @@ from pins import set_output
 def timing_loop():
     """ ***** Main timing algorithm. Runs in a separate thread.***** """
     try:
-        print _('Starting timing loop') + '\n'
+        LOGGER.info('Starting timing loop')
     except Exception:
         pass
     last_min = 0
@@ -176,19 +180,14 @@ template_globals = {
 
 template_render = web.template.render('templates', globals=template_globals, base='base')
 
-if __name__ == '__main__':
+def main():
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.DEBUG)
 
-    #########################################################
-    #### Code to import all webpages and plugin webpages ####
-
+    # Code to import all webpages and plugin webpages
     import plugins
 
-    try:
-        print _('plugins loaded:')
-    except Exception:
-        pass
-    for name in plugins.__all__:
-        print ' ', name
+    LOGGER.info('plugins loaded: %s', ' '.join(plugins.__all__))
 
     gv.plugin_menu.sort(key=lambda entry: entry[0])
     #  Keep plugin manager at top of menu
@@ -202,3 +201,6 @@ if __name__ == '__main__':
     app.notfound = lambda: web.seeother('/')
 
     app.run()
+
+if __name__ == '__main__':
+    main()
