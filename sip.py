@@ -14,9 +14,9 @@ sys.path.append('./plugins')
 import web  # the Web.py module. See webpy.org (Enables the Python OpenSprinkler web interface)
 import gv
 
-from helpers import plugin_adjustment, prog_match, schedule_stations, log_run, stop_onrain, check_rain, jsave, station_names
+from helpers import plugin_adjustment, prog_match, schedule_stations, log_run, stop_onrain, jsave, station_names
 from urls import urls  # Provides access to URLs for UI pages
-from pins import set_output
+from pins import check_rain, set_output
 
 
 def timing_loop():
@@ -139,7 +139,7 @@ def timing_loop():
                     gv.rs[gv.sd['mas'] - 1][1] = gv.now  # turn off master
 
         if gv.sd['urs']:
-            check_rain()  # in helpers.py
+            check_rain()
 
         if gv.sd['rd'] and gv.now >= gv.sd['rdst']:  # Check of rain delay time is up
             gv.sd['rd'] = 0

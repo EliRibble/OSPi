@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-
 import gv
+import logging
+
+LOGGER = logging.getLogger(__name__)
 
 try:
     import RPi.GPIO as GPIO  # Required for accessing General Purpose Input Output pins on Raspberry Pi
@@ -11,7 +13,7 @@ except ImportError:
         gv.platform = 'bo'
     except ImportError:
         gv.platform = ''  # if no platform, allows program to still run.
-        print 'No GPIO module was loaded from GPIO Pins module'
+        LOGGER.error('No GPIO module was loaded from GPIO Pins module')
 
 from blinker import signal
 
@@ -23,24 +25,50 @@ except Exception:
     pass
 
 
-global pin_rain_sense
-global pin_relay
+class PinInterface(object):
+    def __init__(self):
+        pass
 
-try:
-    if gv.platform == 'pi':  # If this will run on Raspberry Pi:
-        GPIO.setmode(GPIO.BOARD)  # IO channels are identified by header connector pin numbers. Pin numbers are always the same regardless of Raspberry Pi board revision.
-        pin_rain_sense = 8
-        pin_relay = 10               
-    elif gv.platform == 'bo':  # If this will run on Beagle Bone Black:
-        pin_rain_sense = "P9_15"
-        pin_relay = "P9_16"        
-except AttributeError:
-    pass
-try:
-    GPIO.setup(pin_rain_sense, GPIO.IN)
-    GPIO.setup(pin_relay, GPIO.OUT)    
-except NameError:
-    pass
+    def setup(self):
+        try:
+            GPIO.setup(self.pin_rain_sense, GPIO.IN)
+            GPIO.setup(self.pin_relay, GPIO.OUT)    
+        except NameError, e:
+            LOGGER.error("Failed to set GPIO directions: %s", e)
+
+class PinInterfacePi(PinInterface):
+    def __init__(self):
+        # IO channels are identified by header connector pin numbers. Pin numbers are always the same regardless of Raspberry Pi board revision.
+        self.pin_rain_sense = 8
+        self.pin_relay = 10
+        GPIO.setmode(GPIO.BOARD)
+
+class PinInterfaceBeagleBone(PinInterface):
+    def __init__(self):
+        self.pin_rain_sense = "P9_15"
+        self.pin_relay = "P9_16"
+
+if gv.platform == 'pi':  # If this will run on Raspberry Pi:
+    interface = PinIerfacePi()
+elif gv.platform == 'bo':  # If this will run on Beagle Bone Black:
+    interface = PinInterfaceBeagleBone()
+
+interface.setup()
+
+def check_rain():
+    try:
+        if gv.sd['rst'] == 1:  # Rain sensor type normally open (default)
+            if not GPIO.input(pin_rain_sense):  # Rain detected
+                gv.sd['rs'] = 1
+            else:
+                gv.sd['rs'] = 0
+        elif gv.sd['rst'] == 0:  # Rain sensor type normally closed
+            if GPIO.input(pin_rain_sense):  # Rain detected
+                gv.sd['rs'] = 1
+            else:
+                gv.sd['rs'] = 0
+    except NameError as e:
+        LOGGER.error("Failed to check rain: %s", e)
 
 
 def setup_pins():
@@ -126,7 +154,7 @@ def setShiftRegister(srvals):
 
 def set_output():
     """Activate triacs according to shift register state."""
-
+    LOGGER.debug("Setting output to %s", gv.srvals)
     disableShiftRegisterOutput()
     setShiftRegister(gv.srvals)  # gv.srvals stores shift register state
     enableShiftRegisterOutput()

@@ -15,7 +15,7 @@ import ast
 from web.webapi import seeother
 
 try:
-    from pins import GPIO, pin_rain_sense, set_output
+    from pins import GPIO, set_output
 except ImportError:
     print 'error importing GPIO pins into helpers'
     pass
@@ -121,24 +121,6 @@ def get_rpi_revision():
         return GPIO.RPI_REVISION
     except ImportError:
         return 0
-
-
-def check_rain():
-    try:
-        if gv.sd['rst'] == 1:  # Rain sensor type normally open (default)
-            if not GPIO.input(pin_rain_sense):  # Rain detected
-                gv.sd['rs'] = 1
-            else:
-                gv.sd['rs'] = 0
-        elif gv.sd['rst'] == 0:  # Rain sensor type normally closed
-            if GPIO.input(pin_rain_sense):  # Rain detected
-                gv.sd['rs'] = 1
-            else:
-                gv.sd['rs'] = 0
-    except NameError:
-        pass
-
-
 
 def clear_mm():
     """Clear manual mode settings."""
