@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import gv
 import logging
+import pins.direct
 import pins.shift_register
 
 LOGGER = logging.getLogger(__name__)
@@ -26,13 +27,11 @@ def check_rain():
         LOGGER.error("Failed to check rain: %s", e)
 
 def setup():
-    try:
-        GPIO.setwarnings(False)
-    except Exception as e:
-        LOGGER.error("Failed to disable GPIO warnings: %s", e)
-
     if gv.platform == 'pi':  # If this will run on Raspberry Pi:
-        setup.interface = pins.shift_register.PinInterfacePi()
+        if getattr(gv, 'pin_interface', None) == 'direct':
+            setup.interface = pins.direct.PinInterfaceDirect()
+        else:
+            setup.interface = pins.shift_register.PinInterfacePi()
     elif gv.platform == 'bo':  # If this will run on Beagle Bone Black:
         setup.interface = pins.shift_register.PinInterfaceBeagleBone()
     else:
@@ -41,6 +40,10 @@ def setup():
 
     setup.interface.setup()
 setup.interface = None
+
+def shutdown():
+    if setup.interface:
+        setup.interface.shutdown()
 
 def set_output():
     """Activate triacs according to shift register state."""

@@ -50,6 +50,8 @@ except ImportError as e:
         LOGGER.info("Failed to import Beagle Bone GPIO. GPIO disabled")
         platform = 'unknown'
 
+pin_interface = 'direct'
+
 from security import password_salt, password_hash
 
 def load_programs():

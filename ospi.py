@@ -202,5 +202,8 @@ def main():
 
     app.run()
 
+    LOGGER.info("Shutting down")
+    pins.shutdown()
+
 if __name__ == '__main__':
     main()

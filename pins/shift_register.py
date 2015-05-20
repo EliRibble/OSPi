@@ -16,21 +16,21 @@ class PinInterfaceShiftRegister(pins.base.PinInterface):
         gv.GPIO.setup(self.pin_sr_lat, gv.GPIO.OUT)
         gv.GPIO.output(self.pin_sr_lat, gv.GPIO.LOW)
 
-    def disable_shift_register_output(self):
+    def _disable_shift_register_output(self):
         """Disable output from shift register."""
         try:
             gv.GPIO.output(self.pin_sr_noe, gv.GPIO.HIGH)
         except Exception as e:
             LOGGER.error("Failed to disable shift register output: %s", e)
 
-    def enable_shift_register_output(self):
+    def _enable_shift_register_output(self):
         """Enable output from shift register."""
         try:
             gv.GPIO.output(self.pin_sr_noe, gv.GPIO.LOW)
         except Exception as e:
             LOGGER.error("Failed to disable shift register output: %s", e)
 
-    def set_shift_register(self, srvals):
+    def _set_shift_register(self, srvals):
         """Set the state of each output pin on the shift register from the srvals list."""
         try:
             gv.GPIO.output(self.pin_sr_clk, gv.GPIO.LOW)
@@ -48,9 +48,9 @@ class PinInterfaceShiftRegister(pins.base.PinInterface):
 
     def set_output(self, register_values):
         LOGGER.debug("Setting output to %s", register_values)
-        self.disable_shift_register_output()
-        self.set_shift_register(register_values)  
-        self.enable_shift_register_output()
+        self._disable_shift_register_output()
+        self._set_shift_register(register_values)  
+        self._enable_shift_register_output()
 
 class PinInterfacePi(PinInterfaceShiftRegister):
     def __init__(self):
